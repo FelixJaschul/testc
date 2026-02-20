@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/felixjaschul/Projects/implc/cmake-build-debug/cmake_install.cmake",
+		"/Users/felixjaschul/Projects/implc/cmake-build-debug/ext/libs/SDL/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

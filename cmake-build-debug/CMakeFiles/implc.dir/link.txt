@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch x86_64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/implc.dir/main.c.o -o implc  -Wl,-rpath,/Users/felixjaschul/Projects/implc/cmake-build-debug/ext/libs/SDL libimgui.a ext/libs/SDL/libSDL3.0.dylib
