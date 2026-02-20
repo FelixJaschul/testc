@@ -1,6 +1,3 @@
-[submodule "ext"]
-	path = ext
-	url = https://github.com/felixjaschul/wrapper.git
 [submodule "wrapper"]
 	path = wrapper
 	url = https://github.com/FelixJaschul/wrapper.git
