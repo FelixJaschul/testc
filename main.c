@@ -24,6 +24,8 @@ typedef struct {
     Input input;
 
     bool running;
+    float delta;
+    float ticks;
     float radius;
     float move_speed;
     float mouse_sensitivity;
@@ -49,14 +51,13 @@ static Vec3 trace_ray(const Ray* ray)
     const float t = -b - sqrtf(d);
     if (t <= 0.00001f) return vec3(0,0,0);
 
-    return vec3(1,1,1);
+    return norm(add(ray->origin, mul(ray->direction, t)));
 }
 
 static void render_frame()
 {
-    const float aspect = (float)state.win.bWidth / (float)state.win.bHeight;
     const float vp_height = 2.0f * tanf((float)(state.cam.fov * M_PI / 180.0f) / 2.0f);
-    const float vp_width = vp_height * aspect;
+    const float vp_width = vp_height * (float)state.win.bWidth / (float)state.win.bHeight;
 
     for (int y = 0; y < state.win.bHeight; y++)
     {
@@ -67,10 +68,14 @@ static void render_frame()
 
             const Ray ray = cameraGetRay(&state.cam, u, v);
             const Vec3 c = trace_ray(&ray);
-
-            const uint8_t r = (uint8_t)(fminf(c.x, 1.0f) * 255.0f);
-            const uint8_t g = (uint8_t)(fminf(c.y, 1.0f) * 255.0f);
-            const uint8_t b = (uint8_t)(fminf(c.z, 1.0f) * 255.0f);
+            
+            uint8_t r, g, b;
+            if (c.x != 0.0f || c.y != 0.0f || c.z != 0.0f) {
+                float phase = atan2f(c.z, c.x) + state.ticks * 0.002f;
+                r = (uint8_t)((0.5f + 0.5f * sinf(phase)) * 255.0f);
+                g = (uint8_t)((0.5f + 0.5f * sinf(phase + 2.0943951f)) * 255.0f);
+                b = (uint8_t)((0.5f + 0.5f * sinf(phase + 4.1887902f)) * 255.0f);
+            } else r = g = b = 0;
 
             state.win.buffer[y * state.win.bWidth + x] = (0xFF<<24)|(r<<16)|(g<<8)|b;
         }
@@ -140,6 +145,8 @@ int main()
 
         render_frame();
         ASSERT(updateFramebuffer(&state.win, state.texture));
+        state.delta = getDelta(&state.win);
+        state.ticks = SDL_GetTicks();
 
         imguiNewFrame();
             ImGui::Begin("status");
