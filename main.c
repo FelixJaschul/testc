@@ -41,14 +41,11 @@ state_t state = {0};
 static Vec3 trace_ray(const Ray* ray)
 {
     const Vec3 oc = ray->origin;
-
     const float b = dot(oc, ray->direction);
-    const float c = dot(oc, oc) - state.radius * state.radius;
-
-    const float d = b*b - c;
-    if (d < 0.0f) return vec3(0,0,0);
-
+    const float d = b*b - dot(oc, oc) - state.radius * state.radius;
     const float t = -b - sqrtf(d);
+
+    if (d < 0.0f) return vec3(0,0,0);
     if (t <= 0.00001f) return vec3(0,0,0);
 
     return norm(add(ray->origin, mul(ray->direction, t)));
