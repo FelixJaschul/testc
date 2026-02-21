@@ -15,12 +15,6 @@
 #define HEIGHT 600
 #define RENDER_SCALE 0.5f
 
-typedef struct {
-    Vec3 center;
-    float radius;
-    Vec3 color;
-} sphere_t;
-
 // state_t
 typedef struct {
     Window_t win;
@@ -29,9 +23,8 @@ typedef struct {
     Camera cam;
     Input input;
 
-    sphere_t sphere;
-
     bool running;
+    float radius;
     float move_speed;
     float mouse_sensitivity;
 } state_t;
@@ -43,41 +36,20 @@ state_t state = {0};
     destroyWindow(&state.win); \
 } while(0)
 
-static bool ray_sphere_intersect(const Ray* ray,
-                                 const sphere_t* s,
-                                 float* t)
-{
-    const Vec3 oc = sub(ray->origin, s->center);
-
-    const float a = dot(ray->direction, ray->direction);
-    const float b = 2.0f * dot(oc, ray->direction);
-    const float c = dot(oc, oc) - s->radius * s->radius;
-
-    const float d = b*b - 4*a*c;
-    if (d < 0.0f) return false;
-
-    const float sqrt_d = sqrtf(d);
-    const float t0 = (-b - sqrt_d) / (2.0f * a);
-
-    if (t0 > 0.00001f) { *t = t0; return true; }
-
-    const float t1 = (-b + sqrt_d) / (2.0f * a);
-    if (t1 > 0.00001f) { *t = t1; return true; }
-
-    return false;
-}
-
 static Vec3 trace_ray(const Ray* ray)
 {
-    float t;
-    if (ray_sphere_intersect(ray, &state.sphere, &t))
-    {
-        const Vec3 p = add(ray->origin, mul(ray->direction, t));
-        const Vec3 n = norm(sub(p, state.sphere.center));
-        return mul(add(n, vec3(1,1,1)), 0.5f);   // normal shading
-    }
+    const Vec3 oc = ray->origin;
 
-    return vec3(0,0,0);
+    const float b = dot(oc, ray->direction);
+    const float c = dot(oc, oc) - state.radius * state.radius;
+
+    const float d = b*b - c;
+    if (d < 0.0f) return vec3(0,0,0);
+
+    const float t = -b - sqrtf(d);
+    if (t <= 0.00001f) return vec3(0,0,0);
+
+    return vec3(1,1,1);
 }
 
 static void render_frame()
@@ -160,12 +132,7 @@ int main()
     state.running = true;
     state.move_speed = 0.1f;
     state.mouse_sensitivity = 0.3f;
-
-    {
-        state.sphere.center = vec3(0.0f, 0.0f, 0.0f);
-        state.sphere.radius = 1.0f;
-        state.sphere.color  = vec3(1.0f, 1.0f, 1.0f);
-    }
+    state.radius = 1.0f;
 
     while (state.running)
     {
