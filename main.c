@@ -9,17 +9,17 @@
 #define CAMERA_IMPLEMENTATION
 #define SDL_IMPLEMENTATION
 #define IMGUI_IMPLEMENTATION
-#include "wrapper/core.h"
+#include "core.h"
 
 #define WIDTH 800
 #define HEIGHT 600
 #define RENDER_SCALE 0.5f
 
-// Prepared triangle
 typedef struct {
-    Vec3 v0, e1, e2;
+    Vec3 center;
+    float radius;
     Vec3 color;
-} tri_t;
+} sphere_t;
 
 // state_t
 typedef struct {
@@ -29,7 +29,7 @@ typedef struct {
     Camera cam;
     Input input;
 
-    tri_t tri;
+    sphere_t sphere;
 
     bool running;
     float move_speed;
@@ -43,34 +43,40 @@ state_t state = {0};
     destroyWindow(&state.win); \
 } while(0)
 
-// Ray-triangle intersection macro
-static bool ray_triangle_intersect(const Ray* ray, 
-                                   const tri_t* tri, 
-                                   float* t)
+static bool ray_sphere_intersect(const Ray* ray,
+                                 const sphere_t* s,
+                                 float* t)
 {
-    const Vec3 h = cross(ray->direction, tri->e2);
-    const float a = dot(tri->e1, h);
-    if (a > -0.00001f && a < 0.00001f) return false;
+    const Vec3 oc = sub(ray->origin, s->center);
 
-    const float f = 1.0f / a;
-    const Vec3 s = sub(ray->origin, tri->v0);
-    const float u = f * dot(s, h);
-    if (u < 0.0f || u > 1.0f) return false;
+    const float a = dot(ray->direction, ray->direction);
+    const float b = 2.0f * dot(oc, ray->direction);
+    const float c = dot(oc, oc) - s->radius * s->radius;
 
-    const Vec3 q = cross(s, tri->e1);
-    const float v = f * dot(ray->direction, q);
-    if (v < 0.0f || u + v > 1.0f) return false;
+    const float d = b*b - 4*a*c;
+    if (d < 0.0f) return false;
 
-    if (const float _t = f * dot(tri->e2, q); _t > 0.00001f) { *t = _t; return true; }
+    const float sqrt_d = sqrtf(d);
+    const float t0 = (-b - sqrt_d) / (2.0f * a);
+
+    if (t0 > 0.00001f) { *t = t0; return true; }
+
+    const float t1 = (-b + sqrt_d) / (2.0f * a);
+    if (t1 > 0.00001f) { *t = t1; return true; }
+
     return false;
 }
 
-// Trace ray macro
 static Vec3 trace_ray(const Ray* ray)
 {
     float t;
-    if (ray_triangle_intersect(ray, &state.tri, &t))
-        return state.tri.color;
+    if (ray_sphere_intersect(ray, &state.sphere, &t))
+    {
+        const Vec3 p = add(ray->origin, mul(ray->direction, t));
+        const Vec3 n = norm(sub(p, state.sphere.center));
+        return mul(add(n, vec3(1,1,1)), 0.5f);   // normal shading
+    }
+
     return vec3(0,0,0);
 }
 
@@ -101,7 +107,6 @@ static void render_frame()
 
 static void update()
 {
-    // Poll events (this now automatically calls updateInput)
     if (pollEvents(&state.win, &state.input)) {
         state.running = false;
         return;
@@ -156,12 +161,10 @@ int main()
     state.move_speed = 0.1f;
     state.mouse_sensitivity = 0.3f;
 
-    {   // Single test triangle in front of the camera
-        const Vec3 v0 = vec3(-1.0f, 0.0f, 0.0f);
-        const Vec3 v1 = vec3( 1.0f, 0.0f, 0.0f);
-        const Vec3 v2 = vec3( 0.0f, 1.0f, 0.0f);
-        const Vec3 color = vec3(0.2f, 0.8f, 0.4f);
-        state.tri = { v0, sub(v1, v0), sub(v2, v0), color };
+    {
+        state.sphere.center = vec3(0.0f, 0.0f, 0.0f);
+        state.sphere.radius = 1.0f;
+        state.sphere.color  = vec3(1.0f, 1.0f, 1.0f);
     }
 
     while (state.running)
