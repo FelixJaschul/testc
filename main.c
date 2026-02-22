@@ -15,7 +15,6 @@
 #define HEIGHT 600
 #define RENDER_SCALE 0.5f
 
-// state_t
 typedef struct {
     Window_t win;
     SDL_Texture* texture;
@@ -42,10 +41,10 @@ static Vec3 trace_ray(const Ray* ray)
 {
     const Vec3 oc = ray->origin;
     const float b = dot(oc, ray->direction);
-    const float d = b*b - dot(oc, oc) - state.radius * state.radius;
-    const float t = -b - sqrtf(d);
+    const float d = b*b - dot(oc, oc) + state.radius * state.radius;
 
     if (d < 0.0f) return vec3(0,0,0);
+    const float t = -b - sqrtf(d);
     if (t <= 0.00001f) return vec3(0,0,0);
 
     return norm(add(ray->origin, mul(ray->direction, t)));
