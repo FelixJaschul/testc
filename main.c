@@ -1,7 +1,7 @@
 #include <imgui.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <math.h>
+#include <cstdint>
+#include <cstdio>
+#include <cmath>
 
 #define CORE_IMPLEMENTATION
 #define MATH_IMPLEMENTATION
