@@ -50,18 +50,17 @@ static void update()
         if (event.type == SDL_EVENT_QUIT) state.running = false;
     }
 
-    const bool *keys = SDL_GetKeyboardState(NULL);
-    if (keys[SDL_SCANCODE_LSHIFT]) releaseMouse(state.win.window, &state.input);
+    if (isKeyDown(&state.input, KEY_LSHIFT)) releaseMouse(state.win.window, &state.input);
     else if (!isMouseGrabbed(&state.input)) grabMouse(state.win.window, state.win.width, state.win.height, &state.input);
 
     float mx = 0, my = 0;
     SDL_GetRelativeMouseState(&mx, &my);
     if (isMouseGrabbed(&state.input)) cameraRotate(&state.cam, mx * state.mouse_sensitivity, -my * state.mouse_sensitivity);
 
-    if (keys[SDL_SCANCODE_W]) cameraMove(&state.cam, state.cam.front, state.move_speed);
-    if (keys[SDL_SCANCODE_S]) cameraMove(&state.cam, mul(state.cam.front, -1.0f), state.move_speed);
-    if (keys[SDL_SCANCODE_A]) cameraMove(&state.cam, mul(state.cam.right, -1.0f), state.move_speed);
-    if (keys[SDL_SCANCODE_D]) cameraMove(&state.cam, state.cam.right, state.move_speed);
+    if (isKeyDown(&state.input, KEY_W)) cameraMove(&state.cam, state.cam.front, state.move_speed);
+    if (isKeyDown(&state.input, KEY_S)) cameraMove(&state.cam, mul(state.cam.front, -1.0f), state.move_speed);
+    if (isKeyDown(&state.input, KEY_A)) cameraMove(&state.cam, mul(state.cam.right, -1.0f), state.move_speed);
+    if (isKeyDown(&state.input, KEY_D)) cameraMove(&state.cam, state.cam.right, state.move_speed);
 }
 
 static bool render()
