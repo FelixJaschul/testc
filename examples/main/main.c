@@ -94,9 +94,9 @@ int main()
     ASSERT(createWindow(&state.win));
 
     cameraInit(&state.cam);
-    state.cam.position = vec3(0.0f, 3.0f, 10.0f);
-    state.cam.yaw = -90.0f;
-    state.cam.pitch = -20.0f;
+    state.cam.position = vec3(10.0f, 14.0f, 24.0f);
+    state.cam.yaw = -114.0f;
+    state.cam.pitch = -40.0f;
     state.cam.fov = 75.0f;
     cameraUpdate(&state.cam);
 

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# WRITTEN BY AI
+
+# Build SDL_shadercross from submodule
+# This script builds the shadercross tool needed for shader format conversion
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SUBMODULE_DIR="${ROOT_DIR}/wrapper/libs/SDL_shadercross"
 BUILD_DIR="${ROOT_DIR}/.build/shadercross"
