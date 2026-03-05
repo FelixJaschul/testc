@@ -20,7 +20,7 @@ int main()
 
     inputInit(&input);
 
-    // ImGui already initialized in createWindow() for CPU mode
+    imguiInit(&win, win.renderer);
 
     SDL_Texture *tex = SDL_CreateTexture(
         win.renderer,
