@@ -89,19 +89,13 @@ static bool render()
     ImGui_ImplSDLGPU3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
-
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(310, 275), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Voxel Raymarcher");
-
+    ImGui::SetNextWindowPos(ImVec2(10, 10));
+    ImGui::Begin("STATE", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoInputs);
     ImGui::SeparatorText("Camera");
     ImGui::Text("Pos  %.2f  %.2f  %.2f", state.cam.position.x, state.cam.position.y, state.cam.position.z);
     ImGui::Text("Yaw  %.1f    Pitch  %.1f", state.cam.yaw, state.cam.pitch);
-
     ImGui::SeparatorText("Info");
-    ImGui::Text("Time  %.2f s", state.ticks);
-    ImGui::Text("FPS   %.1f  (%.2f ms)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
-
+    ImGui::Text("FPS: %.1f  |  Time: %.2fs", ImGui::GetIO().Framerate, state.ticks);
     ImGui::End();
     ImGui::Render();
 
