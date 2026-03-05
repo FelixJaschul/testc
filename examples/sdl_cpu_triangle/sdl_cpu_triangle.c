@@ -1,4 +1,5 @@
 #include <cstdio>
+
 #define CORE_IMPLEMENTATION
 #define SDL_IMPLEMENTATION
 #define IMGUI_IMPLEMENTATION
@@ -18,6 +19,8 @@ int main()
     ASSERT(createWindow(&win));
 
     inputInit(&input);
+
+    // ImGui already initialized in createWindow() for CPU mode
 
     SDL_Texture *tex = SDL_CreateTexture(
         win.renderer,
@@ -46,7 +49,7 @@ int main()
                 const float u = (float)x / win.bWidth * 2 - 1;
                 const float v = (1 - (float)y / win.bHeight) * 2 - 1;
 
-                const float ax =  0.0f, ay =  0.6f, bx = -0.6f, by = -0.6f, cx =  0.6f, cy = -0.6f;
+                const float ax = 0.0f,  ay = 0.5f, bx = -0.5f, by = -0.5f, cx = 0.5f,  cy = -0.5f;
                 const float e0 = (bx - ax) * (v - ay) - (by - ay) * (u - ax);
                 const float e1 = (cx - bx) * (v - by) - (cy - by) * (u - bx);
                 const float e2 = (ax - cx) * (v - cy) - (ay - cy) * (u - cx);

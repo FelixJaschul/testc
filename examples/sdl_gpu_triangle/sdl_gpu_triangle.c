@@ -1,4 +1,5 @@
 #include <cstdio>
+
 #define CORE_IMPLEMENTATION
 #define SDL_IMPLEMENTATION
 #define IMGUI_IMPLEMENTATION
@@ -11,13 +12,14 @@ int main()
     Window_t win;
 
     Input input;
-    inputInit(&input);
 
     windowInit(&win);
     win.width = 800;
     win.height = 600;
     win.title = "GPU Triangle";
     ASSERT(createWindow(&win));
+
+    inputInit(&input);
 
     Gpu gpu;
     ASSERT(gpuInit(&gpu, &win));
@@ -26,7 +28,7 @@ int main()
     SDL_GPUGraphicsPipeline *pipeline = gpuCreatePipeline(&gpu, "basic_triangle", 0, 0);
     ASSERT(pipeline);
 
-    imguiInit(win.window, gpu.device, SDL_GetGPUSwapchainTextureFormat(gpu.device, win.window));
+    imguiInit(&win, gpu.device, SDL_GetGPUSwapchainTextureFormat(gpu.device, win.window));
 
     bool running = true;
     while (running)

@@ -7,11 +7,9 @@
 #define KEYS_IMPLEMENTATION
 #define CAMERA_IMPLEMENTATION
 #define SDL_IMPLEMENTATION
+#define IMGUI_IMPLEMENTATION
+#define GPU_IMPLEMENTATION
 #include "core.h"
-
-#include "imgui.h"
-#include "imgui_impl_sdl3.h"
-#include "imgui_impl_sdlgpu3.h"
 
 #define WIDTH 1270
 #define HEIGHT 850
@@ -21,8 +19,8 @@ typedef struct {
     float cam_right[4];
     float cam_up[4];
     float cam_forward[4];
-    float screen[4]; // x=width, y=height, z=time_sec, w=tan_half_fov
-    float render_cfg[4];  // x=aspect, y=grid_size, z=max_dist, w=max_steps
+    float screen[4];
+    float render_cfg[4];
 } VoxelUniforms;
 
 typedef struct {
@@ -73,7 +71,7 @@ static bool render()
     int width = 0, height = 0;
     if (!gpuGetDrawableSize(&state.gpu, &width, &height)) return false;
 
-    const float aspect       = (height > 0) ? ((float)width / (float)height) : 1.0f;
+    const float aspect = (height > 0) ? ((float)width / (float)height) : 1.0f;
     const float tan_half_fov = tanf((state.cam.fov * PI / 180.0f) * 0.5f);
 
     const VoxelUniforms u = {
@@ -85,10 +83,7 @@ static bool render()
         .render_cfg  = {aspect, state.grid_size, state.max_dist, state.max_steps},
     };
 
-    // 1. Build ImGui draw lists
-    ImGui_ImplSDLGPU3_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
-    ImGui::NewFrame();
+    imguiNewFrame();
     ImGui::SetNextWindowPos(ImVec2(10, 10));
     ImGui::Begin("STATE", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoInputs);
     ImGui::SeparatorText("Camera");
@@ -99,7 +94,6 @@ static bool render()
     ImGui::End();
     ImGui::Render();
 
-    // 2. Acquire command buffer and swapchain — one per frame, shared by all passes
     SDL_GPUCommandBuffer *cmd = SDL_AcquireGPUCommandBuffer(state.gpu.device);
     if (!cmd) return false;
 
@@ -114,12 +108,9 @@ static bool render()
         return true;
     }
 
-    // 3. Upload ImGui vertex/index buffers via a copy pass BEFORE any render pass.
-    //    This is MANDATORY for imgui_impl_sdlgpu3 — copy operations are not
-    //    allowed inside a render pass.
-    ImGui_ImplSDLGPU3_PrepareDrawData(ImGui::GetDrawData(), cmd);
+    imguiPrepareDrawData(cmd);
 
-    // 4. Pass 1: scene (CLEAR to erase previous frame)
+    // Scene pass
     {
         SDL_GPUColorTargetInfo t = {};
         t.texture     = swapchain;
@@ -135,7 +126,7 @@ static bool render()
         SDL_EndGPURenderPass(pass);
     }
 
-    // 5. Pass 2: ImGui (LOAD to composite on top of the scene)
+    // ImGui pass
     {
         SDL_GPUColorTargetInfo t = {};
         t.texture  = swapchain;
@@ -143,7 +134,7 @@ static bool render()
         t.store_op = SDL_GPU_STOREOP_STORE;
 
         SDL_GPURenderPass *pass = SDL_BeginGPURenderPass(cmd, &t, 1, NULL);
-        ImGui_ImplSDLGPU3_RenderDrawData(ImGui::GetDrawData(), cmd, pass);
+        imguiRenderDrawData(cmd, pass);
         SDL_EndGPURenderPass(pass);
     }
 
@@ -168,28 +159,16 @@ int main()
 
     inputInit(&state.input);
 
-    // gpuInit destroys win.renderer — ImGui must be init'd after this
     ASSERT(gpuInit(&state.gpu, &state.win));
 
     state.pipeline = gpuCreatePipeline(&state.gpu, "voxel_raymarch", 0, 1);
     ASSERT(state.pipeline);
 
+    imguiInit(&state.win, state.gpu.device, SDL_GetGPUSwapchainTextureFormat(state.gpu.device, state.win.window));
+
     state.grid_size  = 1.0f;
     state.max_dist   = 140.0f;
     state.max_steps  = 256.0f;
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-    ImGui_ImplSDL3_InitForSDLGPU(state.win.window);
-
-    ImGui_ImplSDLGPU3_InitInfo gpu3_info = {};
-    gpu3_info.Device            = state.gpu.device;
-    gpu3_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(state.gpu.device, state.win.window);
-    gpu3_info.MSAASamples       = SDL_GPU_SAMPLECOUNT_1;
-    ImGui_ImplSDLGPU3_Init(&gpu3_info);
 
     state.running           = true;
     state.move_speed        = 0.1f;
@@ -202,9 +181,6 @@ int main()
         updateFrame(&state.win);
     }
 
-    ImGui_ImplSDLGPU3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
     gpuReleasePipeline(&state.gpu, &state.pipeline);
     gpuFree(&state.gpu);
     destroyWindow(&state.win);
