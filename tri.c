@@ -1,6 +1,4 @@
 #include <cstdio>
-#include <cstring>
-#include <cmath>
 
 #define CORE_IMPLEMENTATION
 #define MATH_IMPLEMENTATION
@@ -13,13 +11,13 @@
 #define HEIGHT 850
 
 typedef struct {
-    float cam_pos[4];
-    float cam_right[4];
-    float cam_up[4];
-    float cam_forward[4];
-    float screen[4]; // x=width, y=height, z=time_sec, w=tan_half_fov
-    float render_cfg[4];  // x=aspect, y=grid_size, z=max_dist, w=max_steps
-} VoxelUniforms;
+    float positions[3][4];
+    float colors[3][4];
+} TriangleVertexUniforms;
+
+typedef struct {
+    float global_tint[4];
+} TriangleFragmentUniforms;
 
 typedef struct {
     Window_t win;
@@ -66,22 +64,31 @@ static bool render()
 {
     if (!state.pipeline) return false;
 
-    int width = 0, height = 0;
-    if (!gpuGetDrawableSize(&state.gpu, &width, &height)) return false;
-
-    const float aspect = (height > 0) ? ((float)width / (float)height) : 1.0f;
-    const float tan_half_fov = tanf((state.cam.fov * PI / 180.0f) * 0.5f);
-
-    const auto u = (VoxelUniforms) {
-        .cam_pos = {state.cam.position.x, state.cam.position.y, state.cam.position.z},
-        .cam_right = {state.cam.right.x, state.cam.right.y, state.cam.right.z},
-        .cam_up = {state.cam.up.x, state.cam.up.y, state.cam.up.z},
-        .cam_forward = {state.cam.front.x, state.cam.front.y, state.cam.front.z},
-        .screen = {(float)width, (float)height, state.ticks, tan_half_fov},
-        .render_cfg = {aspect, 1.0f, 140.0f, 256.0f},
+    TriangleVertexUniforms v = {
+        .positions = {
+            { 0.0f,  0.72f, 0.0f, 0.0f},
+            {-0.72f, -0.72f, 0.0f, 0.0f},
+            { 0.72f, -0.72f, 0.0f, 0.0f},
+        },
+        .colors = {
+            {1.00f, 0.30f, 0.20f, 0.0f},
+            {0.15f, 0.85f, 0.35f, 0.0f},
+            {0.15f, 0.40f, 1.00f, 0.0f},
+        },
     };
 
-    return gpuRenderPipeline(&state.gpu, state.pipeline, NULL, 0, &u, (Uint32)sizeof(u), 3);
+    TriangleFragmentUniforms f = {
+        .global_tint = {1.0f, 1.0f, 1.0f, 0.0f},
+    };
+
+    return gpuRenderPipeline(
+        &state.gpu,
+        state.pipeline,
+        &v,
+        (Uint32)sizeof(v),
+        &f,
+        (Uint32)sizeof(f),
+        3);
 }
 
 int main()
@@ -89,7 +96,7 @@ int main()
     windowInit(&state.win);
     state.win.width = WIDTH;
     state.win.height = HEIGHT;
-    state.win.title = "raycast";
+    state.win.title = "triangle test";
 
     ASSERT(createWindow(&state.win));
 
@@ -103,18 +110,20 @@ int main()
     inputInit(&state.input);
 
     ASSERT(gpuInit(&state.gpu, &state.win));
-
-    state.pipeline = gpuCreatePipeline(&state.gpu, "voxel_raymarch", 0, 1);
+    state.pipeline = gpuCreatePipeline(&state.gpu, "basic_triangle", 1, 1);
     ASSERT(state.pipeline);
-
     state.running = true;
     state.move_speed = 0.1f;
     state.mouse_sensitivity = 0.3f;
 
     while (state.running) {
         update();
+
         state.ticks = (float)SDL_GetTicks() * 0.001f;
-        if (!render()) state.running = false;
+        if (!render()) {
+            state.running = false;
+        }
+
         updateFrame(&state.win);
     }
 
