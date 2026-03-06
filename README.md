@@ -7,4 +7,4 @@
 
 #### to run the examples:
 - `make g=sdl_gpu_triangle`
-- other targets are: `g=sdl_cpu_triangel` `g=sdl_gpu_triangel` `g=sdl_gpu_voxel`
+- other targets are: `g=sdl_cpu_triangle` `g=sdl_gpu_triangle` `g=sdl_gpu_voxel`
