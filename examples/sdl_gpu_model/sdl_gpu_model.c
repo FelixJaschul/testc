@@ -84,7 +84,7 @@ int main()
     ASSERT(createWindow(&state.win));
 
     ASSERT(gpuInit(&state.gpu, &state.win));
-    gpuSetClearColor(&state.gpu, 0.1f, 0.1f, 0.15f, 1.0f);
+    gpuSetClearColor(&state.gpu, 0.0f, 0.0f, 0.0f, 1.0f);
 
     cameraInit(&state.cam);
     state.cam.position = vec3(1.0f, 1.4f, -4.7f);
