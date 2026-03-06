@@ -8,7 +8,7 @@ set(EXAMPLE_DIRS
         "examples/sdl_cpu_triangle"
         "examples/sdl_cpu_model"
         "examples/sdl_gpu_model"
-        "examples/x11_model"
+        "examples/x11_cpu_model"
 )
 
 # Architecture (Apple)

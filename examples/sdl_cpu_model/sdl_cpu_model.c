@@ -39,11 +39,10 @@ static void update()
     getMouseDelta(&state.input, &dx, &dy);
     if (isMouseGrabbed(&state.input)) cameraRotate(&state.cam, dx * 0.3f, -dy * 0.3f);
 
-    const float speed = 0.05f;
-    if (isKeyDown(&state.input, KEY_W)) cameraMove(&state.cam, state.cam.front, speed);
-    if (isKeyDown(&state.input, KEY_S)) cameraMove(&state.cam, mul(state.cam.front, -1.0f), speed);
-    if (isKeyDown(&state.input, KEY_A)) cameraMove(&state.cam, mul(state.cam.right, -1.0f), speed);
-    if (isKeyDown(&state.input, KEY_D)) cameraMove(&state.cam, state.cam.right, speed);
+    if (isKeyDown(&state.input, KEY_W)) cameraMove(&state.cam, state.cam.front, 0.05f);
+    if (isKeyDown(&state.input, KEY_S)) cameraMove(&state.cam, mul(state.cam.front, -1.0f), 0.05f);
+    if (isKeyDown(&state.input, KEY_A)) cameraMove(&state.cam, mul(state.cam.right, -1.0f), 0.05f);
+    if (isKeyDown(&state.input, KEY_D)) cameraMove(&state.cam, state.cam.right, 0.05f);
 
     // Rotate model
     state.rotation += 0.01f;
