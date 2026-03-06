@@ -87,9 +87,9 @@ int main()
 
     cameraInit(&state.cam);
     state.cam.position = vec3(1.0f, 1.4f, -4.7f);
-    state.cam.yaw      = 102.0f;
-    state.cam.pitch    = -17.0f;
-    state.cam.fov      = 60.0f;
+    state.cam.yaw = 102.0f;
+    state.cam.pitch = -17.0f;
+    state.cam.fov = 60.0f;
     cameraUpdate(&state.cam);
 
     inputInit(&state.input);
@@ -97,7 +97,7 @@ int main()
     imguiInit(&state.win, state.gpu.device, SDL_GetGPUSwapchainTextureFormat(state.gpu.device, state.win.window));
 
     renderInit(&state.renderer, &state.win, &state.cam, &state.gpu);
-    state.renderer.light_dir        = norm(vec3(0.5f, -1.0f, 0.5f));
+    state.renderer.light_dir = norm(vec3(0.5f, -1.0f, 0.5f));
 
     Model *cube = modelCreate(state.models, &state.num_models, MAX_MODELS, vec3(0.8f, 0.4f, 0.2f), 0.0f, 0.5f);
     modelLoad(cube, "examples/sdl_gpu_model/cube.obj");

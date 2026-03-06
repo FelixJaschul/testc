@@ -103,10 +103,7 @@ int main()
     imguiInit(&state.win, state.win.renderer);
 
     renderInit(&state.renderer, &state.win, &state.cam);
-    state.renderer.backface_culling = true;
-    state.renderer.light = true;
     state.renderer.light_dir = norm(vec3(0.5f, -1.0f, 0.5f));
-    state.renderer.wireframe = false;
 
     Model* cube = modelCreate(state.models, &state.num_models, MAX_MODELS, vec3(0.8f, 0.4f, 0.2f), 0.0f, 0.5f);
     modelLoad(cube, "examples/sdl_cpu_model/cube.obj");
