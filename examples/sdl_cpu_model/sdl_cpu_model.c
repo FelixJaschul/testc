@@ -39,7 +39,7 @@ static void update()
     getMouseDelta(&state.input, &dx, &dy);
     if (isMouseGrabbed(&state.input)) cameraRotate(&state.cam, dx * 0.3f, -dy * 0.3f);
 
-    const float speed =  0.05f;
+    const float speed = 0.05f;
     if (isKeyDown(&state.input, KEY_W)) cameraMove(&state.cam, state.cam.front, speed);
     if (isKeyDown(&state.input, KEY_S)) cameraMove(&state.cam, mul(state.cam.front, -1.0f), speed);
     if (isKeyDown(&state.input, KEY_A)) cameraMove(&state.cam, mul(state.cam.right, -1.0f), speed);
@@ -48,7 +48,7 @@ static void update()
     // Rotate model
     state.rotation += 0.01f;
     for (int i = 0; i < state.num_models; i++) {
-        modelTransform(&state.models[i], 
+        modelTransform(&state.models[i],
             state.models[i].position,
             vec3(0.0f, state.rotation, 0.0f),
             state.models[i].scale);
@@ -60,6 +60,14 @@ static void render()
 {
     renderClear(&state.renderer);
     renderScene(&state.renderer, state.models, state.num_models);
+
+    static SDL_Texture *texture = NULL;
+    if (!texture) {
+        texture = SDL_CreateTexture(state.win.renderer,
+            SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING,
+            state.win.bWidth, state.win.bHeight);
+    }
+    updateFramebuffer(&state.win, texture);
 
     imguiNewFrame();
     ImGui::SetNextWindowPos(ImVec2(10, 10));
@@ -85,11 +93,10 @@ int main()
     ASSERT(createWindow(&state.win));
 
     cameraInit(&state.cam);
-    state.cam.position = vec3(0.0f, 0.0f, -5.0f);
-    state.cam.yaw = 0.0f;
-    state.cam.pitch = 0.0f;
+    state.cam.position = vec3(1.0f, 1.4f, -4.7f);
+    state.cam.yaw = 102.0f;
+    state.cam.pitch = -17.0f;
     state.cam.fov = 60.0f;
-
     cameraUpdate(&state.cam);
 
     inputInit(&state.input);

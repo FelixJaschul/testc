@@ -32,7 +32,8 @@ static void update()
         return;
     }
 
-    // Camera controls
+    if (isKeyDown(&state.input, KEY_ESCAPE)) { state.running = false; return; }
+
     if (isKeyDown(&state.input, KEY_LSHIFT)) releaseMouse(state.win.display, state.win.window, &state.input);
     else if (!isMouseGrabbed(&state.input)) grabMouse(state.win.display, state.win.window, state.win.width, state.win.height, &state.input);
 
@@ -49,7 +50,7 @@ static void update()
     // Rotate model
     state.rotation += 0.01f;
     for (int i = 0; i < state.num_models; i++) {
-        modelTransform(&state.models[i], 
+        modelTransform(&state.models[i],
             state.models[i].position,
             vec3(0.0f, state.rotation, 0.0f),
             state.models[i].scale);
@@ -69,46 +70,41 @@ int main()
     printf("X11 Model Example - Software 3D Rasterization\n");
     printf("==============================================\n\n");
 
-    // Window setup
     windowInit(&state.win);
     state.win.width = WIDTH;
     state.win.height = HEIGHT;
     state.win.title = "X11 Model - cube.obj";
-    
+
     if (!createWindow(&state.win)) {
         fprintf(stderr, "Failed to create X11 window\n");
         return 1;
     }
     printf("X11 window created: %dx%d\n", WIDTH, HEIGHT);
 
-    // Camera setup
     cameraInit(&state.cam);
-    state.cam.position = vec3(0.0f, 0.0f, -5.0f);
-    state.cam.yaw = 0.0f;
-    state.cam.pitch = 0.0f;
+    state.cam.position = vec3(1.0f, 1.4f, -4.7f);
+    state.cam.yaw = 102.0f;
+    state.cam.pitch = -17.0f;
     state.cam.fov = 60.0f;
     cameraUpdate(&state.cam);
     printf("Camera initialized at (0, 0, -5)\n");
 
-    // Input setup
     inputInit(&state.input);
     printf("Input initialized\n");
 
-    // Renderer setup
     renderInit(&state.renderer, &state.win, &state.cam);
     state.renderer.backface_culling = true;
     state.renderer.light = true;
     state.renderer.light_dir = norm(vec3(0.5f, -1.0f, 0.5f));
     state.renderer.wireframe = false;
-    printf("Renderer initialized (light=%d, culling=%d)\n", 
+    printf("Renderer initialized (light=%d, culling=%d)\n",
         state.renderer.light, state.renderer.backface_culling);
 
-    // Load model
     printf("\nLoading cube.obj...\n");
-    Model* cube = modelCreate(state.models, &state.num_models, MAX_MODELS, 
+    Model* cube = modelCreate(state.models, &state.num_models, MAX_MODELS,
         vec3(0.8f, 0.4f, 0.2f), 0.0f, 0.5f);
     if (cube) {
-        modelLoad(cube, "cube.obj");
+        modelLoad(cube, "examples/x11_model/cube.obj");
         modelTransform(cube, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(2.0f, 2.0f, 2.0f));
         modelUpdate(state.models, state.num_models);
         printf("Model loaded: %d triangles\n", cube->num_triangles);
@@ -128,11 +124,8 @@ int main()
         updateFrame(&state.win);
     }
 
-    // Cleanup
     printf("\nCleaning up...\n");
-    for (int i = 0; i < state.num_models; i++) {
-        modelFree(&state.models[i]);
-    }
+    for (int i = 0; i < state.num_models; i++) modelFree(&state.models[i]);
     renderFree(&state.renderer);
     destroyWindow(&state.win);
     printf("Done!\n");
