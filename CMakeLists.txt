@@ -9,7 +9,15 @@ if(APPLE)
 endif()
 
 set(EXAMPLE_DIRS "examples/sdl_gpu_voxel"
-                 "examples/sdl_gpu_triangle" "examples/sdl_cpu_triangle")
+                 "examples/sdl_gpu_triangle"
+                 "examples/sdl_cpu_triangle"
+                 "examples/sdl_cpu_model"
+                 "examples/sdl_gpu_model")
+
+# X11 example (Linux only)
+if(NOT APPLE)
+    list(APPEND EXAMPLE_DIRS "examples/x11_model")
+endif()
 
 # SDL3
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
