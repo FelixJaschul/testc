@@ -105,6 +105,7 @@ int main()
     state.win.width  = WIDTH;
     state.win.height = HEIGHT;
     state.win.title  = "SDL GPU voxel";
+    state.win.skip_renderer = true;
 
     ASSERT(createWindow(&state.win));
 
@@ -133,12 +134,13 @@ int main()
     state.mouse_sensitivity = 0.3f;
 
     while (state.running) {
-        update();
         state.ticks = (float)SDL_GetTicks() * 0.001f;
+        update();
         if (!render()) state.running = false;
         updateFrame(&state.win);
     }
 
+    imguiFree();
     gpuReleasePipeline(&state.gpu, &state.pipeline);
     gpuFree(&state.gpu);
     destroyWindow(&state.win);

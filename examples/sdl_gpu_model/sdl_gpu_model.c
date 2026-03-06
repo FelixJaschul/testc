@@ -80,6 +80,7 @@ int main()
     state.win.width  = WIDTH;
     state.win.height = HEIGHT;
     state.win.title  = "SDL GPU Model";
+    state.win.skip_renderer = true;
     ASSERT(createWindow(&state.win));
 
     ASSERT(gpuInit(&state.gpu, &state.win));
@@ -114,10 +115,10 @@ int main()
     }
 
     for (int i = 0; i < state.num_models; i++) modelFree(&state.models[i]);
+    imguiFree();
     renderFree(&state.renderer);
     gpuFree(&state.gpu);
     destroyWindow(&state.win);
     printf("Done!\n");
-
     return 0;
 }

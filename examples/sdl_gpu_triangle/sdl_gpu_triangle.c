@@ -17,6 +17,7 @@ int main()
     win.width = 800;
     win.height = 600;
     win.title = "SDL GPU Triangle";
+    win.skip_renderer = true;
     ASSERT(createWindow(&win));
 
     inputInit(&input);
@@ -78,6 +79,7 @@ int main()
         updateFrame(&win);
     }
 
+    imguiFree();
     gpuReleasePipeline(&gpu, &pipeline);
     gpuFree(&gpu);
     destroyWindow(&win);
